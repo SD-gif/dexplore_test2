@@ -23,7 +23,7 @@ public class S3ImageUploadController {
 
     private final S3UploadService s3UploadService;
 
-    @PostMapping("/api/bucket_upload")
+    @PostMapping("/api/image_upload")
     public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
     try {
         String imageUrl = s3UploadService.saveFile(file);
@@ -37,7 +37,7 @@ public class S3ImageUploadController {
      }
     }
 
-    @GetMapping("/api/get_s3_list")
+    @GetMapping("/api/get_image_list")
     public ResponseEntity<List<String>> getS3ImageList() {
         List<String> imageUrls = s3UploadService.listImages();
         return ResponseEntity.ok().body(imageUrls);
