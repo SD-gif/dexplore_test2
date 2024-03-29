@@ -47,21 +47,21 @@ public class S3UploadService {
     public List<String> listImages() {
         ListObjectsV2Request req = new ListObjectsV2Request().withBucketName(bucket);
         ListObjectsV2Result result;
-        List<String> imageUrls = new ArrayList<>();
-
+        List<String> fileNames = new ArrayList<>();
+    
         do {
             result = amazonS3.listObjectsV2(req);
-
+    
             for (S3ObjectSummary objectSummary : result.getObjectSummaries()) {
-                // 이미지 URL을 생성하여 리스트에 추가합니다.
-                String imageUrl = amazonS3.getUrl(bucket, objectSummary.getKey()).toString();
-                imageUrls.add(imageUrl);
+                // 파일 이름만 가져와서 리스트에 추가합니다.
+                String fileName = objectSummary.getKey();
+                fileNames.add(fileName);
             }
-
+    
             req.setContinuationToken(result.getNextContinuationToken());
         } while (result.isTruncated());
-
-        return imageUrls;
+    
+        return fileNames;
     }
 
     public ResponseEntity<?> getImage(String imageUrl) {

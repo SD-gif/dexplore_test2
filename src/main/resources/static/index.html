@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이미지 업로드 및 목록 가져오기</title>
+</head>
+<body>
+<h2>이미지 업로드</h2>
+<form id="imageUploadForm" enctype="multipart/form-data">
+    <input type="file" id="imageInput" accept="image/*" name="file">
+    <button type="button" onclick="uploadImage()">이미지 업로드</button>
+</form>
+
+<h2>이미지 목록</h2>
+<ul id="imageList"></ul>
+
+<h2>이미지 가져오기</h2>
+<form id="getImageForm">
+    <input type="text" id="imageUrlInput" placeholder="이미지 URL 입력">
+    <button type="button" onclick="getImage()">이미지 가져오기</button>
+</form>
+<div id="imageView"></div>
+
+<script>
+function uploadImage() {
+    var formData = new FormData();
+    var fileInput = document.getElementById('imageInput');
+    var file = fileInput.files[0];
+    formData.append('file', file);
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/image_upload', true);
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            alert('이미지가 성공적으로 업로드되었습니다.');
+            // 이미지 업로드 후 목록 새로고침
+            getImageList();
+        } else {
+            alert('이미지 업로드에 실패했습니다.');
+        }
+    };
+    xhr.send(formData);
+}
+
+function getImageList() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/api/get_image_list', true);
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            var imageList = JSON.parse(xhr.responseText);
+            displayImageList(imageList);
+        } else {
+            alert('이미지 목록을 가져오는 데 실패했습니다.');
+        }
+    };
+    xhr.send();
+}
+
+function displayImageList(imageList) {
+    var listElement = document.getElementById('imageList');
+    listElement.innerHTML = ''; // 목록 초기화
+
+    imageList.forEach(function(imageUrl) {
+        var listItem = document.createElement('li');
+        var linkElement = document.createElement('a');
+        linkElement.href = imageUrl;
+        linkElement.textContent = imageUrl;
+        listItem.appendChild(linkElement);
+        listElement.appendChild(listItem);
+    });
+}
+
+function getImage() {
+    var imageUrlInput = document.getElementById('imageUrlInput').value;
+    var imageView = document.getElementById('imageView');
+    imageView.innerHTML = ''; // 이미지 뷰 초기화
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/get_image?imageUrl=' + encodeURIComponent(imageUrlInput), true);
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            var imageElement = document.createElement('img');
+            imageElement.src = imageUrlInput;
+            imageView.appendChild(imageElement);
+        } else {
+            alert('이미지를 가져오는 데 실패했습니다.');
+        }
+    };
+    xhr.send();
+}
+
+// 페이지 로드 시 이미지 목록 가져오기
+window.onload = function() {
+    getImageList();
+};
+</script>
+</body>
+</html>
